@@ -1,0 +1,444 @@
+unit uNatural;
+ 
+{$mode ObjFPC}{$H+}
+ 
+interface
+ 
+type
+ 
+  { Natural }
+ 
+  Natural = class
+  private
+    num: String;              // atributo privado: el numero como cadena de digitos
+    procedure normalizar;
+    function esDigito(c: Char): Boolean;
+    function digito(c: Char): Integer;
+    function apocopar(s: String): String;
+    function literalDecenas(n: Integer): String;
+    function literalCentenas(n: Integer): String;
+    function literalMiles(n: Integer): String;
+  public
+    constructor Crear(n: String);
+    function setNum(n: String): Boolean;
+    function getNum: String;
+    function aEntero: Int64;
+    // ----- Operaciones sobre Digitos -----
+    function insertar(d: Char; pos: Integer): Boolean;
+    function obtener(pos: Integer): Char;
+    function eliminar(pos: Integer): Boolean;
+    function cantidad: Integer;
+    function sumar: Integer;
+    function pares: Integer;
+    function impares: Integer;
+    function primos: Integer;
+    function mayor: Integer;
+    function menor: Integer;
+    // ----- Operaciones sobre Enteros -----
+    function invertir: String;
+    function capicua: Boolean;
+    function par: Boolean;
+    function impar: Boolean;
+    function primo: Boolean;
+    function aBinario: String;
+    function aOctal: String;
+    function aHexadecimal: String;
+    function aBaseN(b: Integer): String;
+    function aRomano: String;
+    function aLiteral: String;
+  end;
+ 
+implementation
+ 
+uses SysUtils;
+ 
+{----------------------- Constructor y encapsulamiento -----------------------}
+ 
+constructor Natural.Crear(n: String);
+begin
+  if not setNum(n) then
+    num := '0';
+end;
+ 
+function Natural.setNum(n: String): Boolean;
+var
+  i: Integer;
+  s: String;
+begin
+  s := Trim(n);
+  if s = '' then
+    Exit(False);
+  for i := 1 to Length(s) do
+    if not esDigito(s[i]) then
+      Exit(False);
+  num := s;
+  normalizar;
+  Result := True;
+end;
+ 
+function Natural.getNum: String;
+begin
+  Result := num;
+end;
+ 
+function Natural.aEntero: Int64;
+begin
+  if Length(num) > 18 then
+    Result := -1                    // indicador: no cabe en Int64
+  else
+    Result := StrToInt64Def(num, -1);
+end;
+ 
+{----------------------------- Auxiliares privados ---------------------------}
+ 
+function Natural.esDigito(c: Char): Boolean;
+begin
+  Result := (c >= '0') and (c <= '9');
+end;
+ 
+function Natural.digito(c: Char): Integer;
+begin
+  Result := Ord(c) - 48;
+end;
+ 
+procedure Natural.normalizar;
+var
+  i: Integer;
+begin
+  i := 1;
+  while (i < Length(num)) and (num[i] = '0') do
+    Inc(i);
+  num := Copy(num, i, Length(num));
+  if num = '' then
+    num := '0';
+end;
+ 
+{------------------------ Operaciones sobre Digitos --------------------------}
+ 
+function Natural.insertar(d: Char; pos: Integer): Boolean;
+begin
+  if (not esDigito(d)) or (pos < 1) or (pos > Length(num) + 1) then
+    Exit(False);
+  Insert(d, num, pos);
+  normalizar;
+  Result := True;
+end;
+ 
+function Natural.obtener(pos: Integer): Char;
+begin
+  if (pos < 1) or (pos > Length(num)) then
+    Result := '*'            // '*' indica posicion invalida
+  else
+    Result := num[pos];
+end;
+ 
+function Natural.eliminar(pos: Integer): Boolean;
+begin
+  if (pos < 1) or (pos > Length(num)) then
+    Exit(False);
+  Delete(num, pos, 1);
+  if num = '' then
+    num := '0'
+  else
+    normalizar;
+  Result := True;
+end;
+ 
+function Natural.cantidad: Integer;
+begin
+  Result := Length(num);
+end;
+ 
+function Natural.sumar: Integer;
+var
+  i, s: Integer;
+begin
+  s := 0;
+  for i := 1 to Length(num) do
+    s := s + digito(num[i]);
+  Result := s;
+end;
+ 
+function Natural.pares: Integer;
+var
+  i, c: Integer;
+begin
+  c := 0;
+  for i := 1 to Length(num) do
+    if digito(num[i]) mod 2 = 0 then
+      Inc(c);
+  Result := c;
+end;
+ 
+function Natural.impares: Integer;
+var
+  i, c: Integer;
+begin
+  c := 0;
+  for i := 1 to Length(num) do
+    if digito(num[i]) mod 2 = 1 then
+      Inc(c);
+  Result := c;
+end;
+ 
+function Natural.primos: Integer;
+var
+  i, d, c: Integer;
+begin
+  c := 0;
+  for i := 1 to Length(num) do
+  begin
+    d := digito(num[i]);
+    if (d = 2) or (d = 3) or (d = 5) or (d = 7) then
+      Inc(c);
+  end;
+  Result := c;
+end;
+ 
+function Natural.mayor: Integer;
+var
+  i, d, m: Integer;
+begin
+  m := -1;
+  for i := 1 to Length(num) do
+  begin
+    d := digito(num[i]);
+    if d > m then
+      m := d;
+  end;
+  Result := m;
+end;
+ 
+function Natural.menor: Integer;
+var
+  i, d, m: Integer;
+begin
+  m := 10;
+  for i := 1 to Length(num) do
+  begin
+    d := digito(num[i]);
+    if d < m then
+      m := d;
+  end;
+  Result := m;
+end;
+ 
+{------------------------ Operaciones sobre Enteros --------------------------}
+ 
+function Natural.invertir: String;
+var
+  i: Integer;
+  inv: String;
+begin
+  inv := '';
+  for i := Length(num) downto 1 do
+    inv := inv + num[i];
+  // quitar ceros a la izquierda del invertido
+  i := 1;
+  while (i < Length(inv)) and (inv[i] = '0') do
+    Inc(i);
+  Result := Copy(inv, i, Length(inv));
+end;
+ 
+function Natural.capicua: Boolean;
+begin
+  Result := invertir = num;
+end;
+ 
+function Natural.par: Boolean;
+begin
+  Result := digito(num[Length(num)]) mod 2 = 0;
+end;
+ 
+function Natural.impar: Boolean;
+begin
+  Result := not par;
+end;
+ 
+function Natural.primo: Boolean;
+var
+  n, i: Int64;
+begin
+  n := aEntero;
+  if (n < 0) or (n < 2) then
+    Exit(False);
+  if n = 2 then
+    Exit(True);
+  if n mod 2 = 0 then
+    Exit(False);
+  i := 3;
+  while i <= n div i do        // equivalente a i <= sqrt(n), sin desbordar
+  begin
+    if n mod i = 0 then
+      Exit(False);
+    i := i + 2;
+  end;
+  Result := True;
+end;
+ 
+function Natural.aBaseN(b: Integer): String;
+var
+  n: Int64;
+  d: Integer;
+  cad: String;
+begin
+  if (b < 2) or (b > 16) then
+    Exit('Error: la base debe estar entre 2 y 16');
+  n := aEntero;
+  if n < 0 then
+    Exit('Error: numero demasiado grande para convertir');
+  if n = 0 then
+    Exit('0');
+  cad := '';
+  while n > 0 do
+  begin
+    d := n mod b;
+    n := n div b;
+    if d < 10 then
+      cad := Chr(48 + d) + cad      // digitos '0'..'9'
+    else
+      cad := Chr(55 + d) + cad;     // 10='A' ... 15='F'
+  end;
+  Result := cad;
+end;
+ 
+function Natural.aBinario: String;
+begin
+  Result := aBaseN(2);
+end;
+ 
+function Natural.aOctal: String;
+begin
+  Result := aBaseN(8);
+end;
+ 
+function Natural.aHexadecimal: String;
+begin
+  Result := aBaseN(16);
+end;
+ 
+function Natural.aRomano: String;
+const
+  val: array[1..13] of Integer = (1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1);
+  sim: array[1..13] of String = ('M', 'CM', 'D', 'CD', 'C', 'XC', 'L', 'XL', 'X', 'IX', 'V', 'IV', 'I');
+var
+  n: Int64;
+  i: Integer;
+begin
+  n := aEntero;
+  if (n < 1) or (n > 3999) then
+    Exit('Error: el numero debe estar entre 1 y 3999');
+  Result := '';
+  i := 1;
+  while n > 0 do
+  begin
+    while n >= val[i] do
+    begin
+      Result := Result + sim[i];
+      n := n - val[i];
+    end;
+    Inc(i);
+  end;
+end;
+ 
+{--------------------- Auxiliares para la conversión a literal ----------------}
+ 
+function Natural.apocopar(s: String): String;
+begin
+  // cambia el 'uno' final por 'un' (veintiuno -> veintiun; uno -> un)
+  Result := s;
+  if (Length(s) >= 3) and (Copy(s, Length(s) - 2, 3) = 'uno') then
+    Result := Copy(s, 1, Length(s) - 3) + 'un';
+end;
+ 
+function Natural.literalDecenas(n: Integer): String;
+const
+  unidades: array[0..9] of String = ('cero', 'uno', 'dos', 'tres', 'cuatro',
+    'cinco', 'seis', 'siete', 'ocho', 'nueve');
+  especiales: array[10..29] of String = ('diez', 'once', 'doce', 'trece',
+    'catorce', 'quince', 'dieciseis', 'diecisiete', 'dieciocho', 'diecinueve',
+    'veinte', 'veintiuno', 'veintidos', 'veintitres', 'veinticuatro',
+    'veinticinco', 'veintiseis', 'veintisiete', 'veintiocho', 'veintinueve');
+  decenas: array[3..9] of String = ('treinta', 'cuarenta', 'cincuenta',
+    'sesenta', 'setenta', 'ochenta', 'noventa');
+var
+  d, u: Integer;
+begin
+  if n <= 9 then
+    Result := unidades[n]
+  else if n <= 29 then
+    Result := especiales[n]
+  else
+  begin
+    d := n div 10;
+    u := n mod 10;
+    if u = 0 then
+      Result := decenas[d]
+    else
+      Result := decenas[d] + ' y ' + unidades[u];
+  end;
+end;
+ 
+function Natural.literalCentenas(n: Integer): String;
+const
+  centenas: array[1..9] of String = ('ciento', 'doscientos', 'trescientos',
+    'cuatrocientos', 'quinientos', 'seiscientos', 'setecientos', 'ochocientos',
+    'novecientos');
+var
+  c, r: Integer;
+begin
+  if n = 0 then
+    Exit('');
+  if n < 100 then                 // <-- CORRECCION: antes faltaba este caso
+    Exit(literalDecenas(n));
+  if n = 100 then
+    Exit('cien');
+  c := n div 100;
+  r := n mod 100;
+  if r = 0 then
+    Result := centenas[c]
+  else
+    Result := centenas[c] + ' ' + literalDecenas(r);
+end;
+ 
+function Natural.literalMiles(n: Integer): String;
+var
+  mil, r: Integer;
+begin
+  if n = 0 then
+    Exit('');
+  if n < 1000 then
+    Exit(literalCentenas(n));
+  mil := n div 1000;
+  r := n mod 1000;
+  if mil = 1 then
+    Result := 'mil'
+  else
+    Result := apocopar(literalCentenas(mil)) + ' mil';
+  if r > 0 then
+    Result := Result + ' ' + literalCentenas(r);
+end;
+ 
+function Natural.aLiteral: String;
+var
+  n, resto: Int64;
+  millones: Integer;
+begin
+  n := aEntero;
+  if (n < 0) or (n > 999999999) then
+    Exit('Error: el literal soporta hasta 999999999');
+  if n = 0 then
+    Exit('cero');
+  if n < 1000000 then
+    Exit(literalMiles(Integer(n)));
+  millones := n div 1000000;
+  resto := n mod 1000000;
+  if millones = 1 then
+    Result := 'un millon'
+  else
+    Result := apocopar(literalMiles(millones)) + ' millones';
+  if resto > 0 then
+    Result := Result + ' ' + literalMiles(Integer(resto));
+end;
+ 
+end.
