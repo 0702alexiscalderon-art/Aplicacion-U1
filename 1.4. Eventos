@@ -1,0 +1,291 @@
+unit uMainNatural;
+ 
+{$mode ObjFPC}{$H+}
+ 
+interface
+ 
+uses
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, uNatural;
+ 
+type
+ 
+  { TForm1 }
+ 
+  TForm1 = class(TForm)
+    BtnAplicar: TButton;
+    BtnLimpiar: TButton;
+    BtnInsertar: TButton;
+    BtnObtener: TButton;
+    BtnEliminar: TButton;
+    BtnCantidad: TButton;
+    BtnSumar: TButton;
+    BtnPares: TButton;
+    BtnImpares: TButton;
+    BtnPrimos: TButton;
+    BtnMayor: TButton;
+    BtnMenor: TButton;
+    BtnInvertir: TButton;
+    BtnCapicua: TButton;
+    BtnPar: TButton;
+    BtnImpar: TButton;
+    BtnPrimo: TButton;
+    BtnBinario: TButton;
+    BtnOctal: TButton;
+    BtnHexa: TButton;
+    BtnBaseN: TButton;
+    BtnRomano: TButton;
+    BtnLiteral: TButton;
+    EditNum: TEdit;
+    EditDig: TEdit;
+    EditPos: TEdit;
+    EditBase: TEdit;
+    GB1: TGroupBox;
+    GB2: TGroupBox;
+    LblNum: TLabel;
+    LblActual: TLabel;
+    LblDig: TLabel;
+    LblPos: TLabel;
+    LblBase: TLabel;
+    MemoResult: TMemo;
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure BtnAplicarClick(Sender: TObject);
+    procedure BtnLimpiarClick(Sender: TObject);
+    procedure BtnInsertarClick(Sender: TObject);
+    procedure BtnObtenerClick(Sender: TObject);
+    procedure BtnEliminarClick(Sender: TObject);
+    procedure BtnCantidadClick(Sender: TObject);
+    procedure BtnSumarClick(Sender: TObject);
+    procedure BtnParesClick(Sender: TObject);
+    procedure BtnImparesClick(Sender: TObject);
+    procedure BtnPrimosClick(Sender: TObject);
+    procedure BtnMayorClick(Sender: TObject);
+    procedure BtnMenorClick(Sender: TObject);
+    procedure BtnInvertirClick(Sender: TObject);
+    procedure BtnCapicuaClick(Sender: TObject);
+    procedure BtnParClick(Sender: TObject);
+    procedure BtnImparClick(Sender: TObject);
+    procedure BtnPrimoClick(Sender: TObject);
+    procedure BtnBinarioClick(Sender: TObject);
+    procedure BtnOctalClick(Sender: TObject);
+    procedure BtnHexaClick(Sender: TObject);
+    procedure BtnBaseNClick(Sender: TObject);
+    procedure BtnRomanoClick(Sender: TObject);
+    procedure BtnLiteralClick(Sender: TObject);
+  private
+    nat: Natural;               // el objeto de la clase Natural
+    procedure MostrarActual;
+    procedure Salida(const s: String);
+  public
+  end;
+ 
+var
+  Form1: TForm1;
+ 
+implementation
+ 
+{$R *.lfm}
+ 
+{---------------------------- Auxiliares del form ----------------------------}
+ 
+procedure TForm1.MostrarActual;
+begin
+  LblActual.Caption := 'Natural actual: ' + nat.getNum;
+end;
+ 
+procedure TForm1.Salida(const s: String);
+begin
+  MemoResult.Lines.Add(s);
+end;
+ 
+{------------------------------ Evento OnCreate ------------------------------}
+ 
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+  nat := Natural.Crear('12345');   // objeto inicial de ejemplo
+  MostrarActual;
+end;
+ 
+{------------------------------ Evento OnDestroy -----------------------------}
+ 
+procedure TForm1.FormDestroy(Sender: TObject);
+begin
+  nat.Free;
+end;
+ 
+{--------------------------- Eventos de los botones ---------------------------}
+ 
+procedure TForm1.BtnAplicarClick(Sender: TObject);
+begin
+  if nat.setNum(EditNum.Text) then
+  begin
+    MostrarActual;
+    Salida('setNum() -> numero cargado: ' + nat.getNum);
+  end
+  else
+    Salida('Error: ingrese solamente digitos (0-9)');
+end;
+ 
+procedure TForm1.BtnLimpiarClick(Sender: TObject);
+begin
+  MemoResult.Lines.Clear;
+end;
+ 
+{----- Operaciones sobre Digitos -----}
+ 
+procedure TForm1.BtnInsertarClick(Sender: TObject);
+var
+  pos: Integer;
+begin
+  if (Length(EditDig.Text) <> 1) or not (EditDig.Text[1] in ['0'..'9']) then
+  begin
+    Salida('Error: ingrese un solo digito (0-9)');
+    Exit;
+  end;
+  pos := StrToIntDef(EditPos.Text, -1);
+  if nat.insertar(EditDig.Text[1], pos) then
+  begin
+    MostrarActual;
+    Salida('insertar(' + EditDig.Text + ', ' + IntToStr(pos) + ') -> ' + nat.getNum);
+  end
+  else
+    Salida('Error: posicion invalida. Use 1 a ' + IntToStr(nat.cantidad + 1));
+end;
+ 
+procedure TForm1.BtnObtenerClick(Sender: TObject);
+var
+  pos: Integer;
+  d: Char;
+begin
+  pos := StrToIntDef(EditPos.Text, -1);
+  d := nat.obtener(pos);
+  if d = '*' then
+    Salida('Error: posicion invalida. Use 1 a ' + IntToStr(nat.cantidad))
+  else
+    Salida('obtener(' + IntToStr(pos) + ') -> ' + d);
+end;
+ 
+procedure TForm1.BtnEliminarClick(Sender: TObject);
+var
+  pos: Integer;
+begin
+  pos := StrToIntDef(EditPos.Text, -1);
+  if nat.eliminar(pos) then
+  begin
+    MostrarActual;
+    Salida('eliminar(' + IntToStr(pos) + ') -> ' + nat.getNum);
+  end
+  else
+    Salida('Error: posicion invalida. Use 1 a ' + IntToStr(nat.cantidad));
+end;
+ 
+procedure TForm1.BtnCantidadClick(Sender: TObject);
+begin
+  Salida('cantidad() -> ' + IntToStr(nat.cantidad));
+end;
+ 
+procedure TForm1.BtnSumarClick(Sender: TObject);
+begin
+  Salida('sumar() -> ' + IntToStr(nat.sumar));
+end;
+ 
+procedure TForm1.BtnParesClick(Sender: TObject);
+begin
+  Salida('pares() -> ' + IntToStr(nat.pares) + ' digitos pares');
+end;
+ 
+procedure TForm1.BtnImparesClick(Sender: TObject);
+begin
+  Salida('impares() -> ' + IntToStr(nat.impares) + ' digitos impares');
+end;
+ 
+procedure TForm1.BtnPrimosClick(Sender: TObject);
+begin
+  Salida('primos() -> ' + IntToStr(nat.primos) + ' digitos primos');
+end;
+ 
+procedure TForm1.BtnMayorClick(Sender: TObject);
+begin
+  Salida('mayor() -> ' + IntToStr(nat.mayor));
+end;
+ 
+procedure TForm1.BtnMenorClick(Sender: TObject);
+begin
+  Salida('menor() -> ' + IntToStr(nat.menor));
+end;
+ 
+{----- Operaciones sobre Enteros -----}
+ 
+procedure TForm1.BtnInvertirClick(Sender: TObject);
+begin
+  Salida('invertir() -> ' + nat.invertir);
+end;
+ 
+procedure TForm1.BtnCapicuaClick(Sender: TObject);
+begin
+  if nat.capicua then
+    Salida('capicua() -> ' + nat.getNum + ' ES capicua')
+  else
+    Salida('capicua() -> ' + nat.getNum + ' NO es capicua');
+end;
+ 
+procedure TForm1.BtnParClick(Sender: TObject);
+begin
+  if nat.par then
+    Salida('par() -> ' + nat.getNum + ' ES par')
+  else
+    Salida('par() -> ' + nat.getNum + ' NO es par');
+end;
+ 
+procedure TForm1.BtnImparClick(Sender: TObject);
+begin
+  if nat.impar then
+    Salida('impar() -> ' + nat.getNum + ' ES impar')
+  else
+    Salida('impar() -> ' + nat.getNum + ' NO es impar');
+end;
+ 
+procedure TForm1.BtnPrimoClick(Sender: TObject);
+begin
+  if nat.aEntero < 0 then
+    Salida('Error: numero demasiado grande para la operacion')
+  else if nat.primo then
+    Salida('primo() -> ' + nat.getNum + ' ES primo')
+  else
+    Salida('primo() -> ' + nat.getNum + ' NO es primo');
+end;
+ 
+procedure TForm1.BtnBinarioClick(Sender: TObject);
+begin
+  Salida('aBinario() -> ' + nat.aBinario);
+end;
+ 
+procedure TForm1.BtnOctalClick(Sender: TObject);
+begin
+  Salida('aOctal() -> ' + nat.aOctal);
+end;
+ 
+procedure TForm1.BtnHexaClick(Sender: TObject);
+begin
+  Salida('aHexadecimal() -> ' + nat.aHexadecimal);
+end;
+ 
+procedure TForm1.BtnBaseNClick(Sender: TObject);
+var
+  b: Integer;
+begin
+  b := StrToIntDef(EditBase.Text, -1);
+  Salida('aBaseN(' + IntToStr(b) + ') -> ' + nat.aBaseN(b));
+end;
+ 
+procedure TForm1.BtnRomanoClick(Sender: TObject);
+begin
+  Salida('aRomano() -> ' + nat.aRomano);
+end;
+ 
+procedure TForm1.BtnLiteralClick(Sender: TObject);
+begin
+  Salida('aLiteral() -> ' + nat.aLiteral);
+end;
+ 
+end.
